@@ -118,6 +118,19 @@ function spawnShards(count) {
 }
 
 const SVG_NS = "http://www.w3.org/2000/svg";
+
+function addCrackLine(svg, x1, y1, x2, y2, width) {
+  const line = document.createElementNS(SVG_NS, "line");
+  line.setAttribute("x1", x1.toFixed(1));
+  line.setAttribute("y1", y1.toFixed(1));
+  line.setAttribute("x2", x2.toFixed(1));
+  line.setAttribute("y2", y2.toFixed(1));
+  line.setAttribute("stroke", "rgba(255, 255, 255, 0.92)");
+  line.setAttribute("stroke-width", width);
+  line.setAttribute("stroke-linecap", "round");
+  svg.appendChild(line);
+}
+
 function spawnCrack() {
   const svg = document.createElementNS(SVG_NS, "svg");
   svg.setAttribute("viewBox", "0 0 200 200");
@@ -125,39 +138,44 @@ function spawnCrack() {
 
   const cx = 100;
   const cy = 100;
-  const branches = 6 + Math.floor(Math.random() * 3);
-  for (let i = 0; i < branches; i++) {
-    const baseAngle = (Math.PI * 2 * i) / branches + (Math.random() - 0.5) * 0.4;
-    const segments = 3 + Math.floor(Math.random() * 2);
-    let x = cx;
-    let y = cy;
-    let points = `${x},${y}`;
-    for (let s = 0; s < segments; s++) {
-      const dist = (95 / segments) * (s + 1);
-      const jitter = (Math.random() - 0.5) * 16;
-      const angle = baseAngle + (Math.random() - 0.5) * 0.3;
-      x = cx + Math.cos(angle) * dist + jitter;
-      y = cy + Math.sin(angle) * dist + jitter;
-      points += ` ${x.toFixed(1)},${y.toFixed(1)}`;
-    }
 
-    const shadow = document.createElementNS(SVG_NS, "polyline");
-    shadow.setAttribute("points", points);
-    shadow.setAttribute("fill", "none");
-    shadow.setAttribute("stroke", "rgba(90, 40, 0, 0.6)");
-    shadow.setAttribute("stroke-width", "4.5");
-    shadow.setAttribute("stroke-linecap", "round");
-    shadow.setAttribute("stroke-linejoin", "round");
-    svg.appendChild(shadow);
+  // A tight little web at the impact point for an anchor
+  for (let i = 0; i < 5; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const dist = 6 + Math.random() * 6;
+    addCrackLine(svg, cx, cy, cx + Math.cos(angle) * dist, cy + Math.sin(angle) * dist, 2);
+  }
 
-    const line = document.createElementNS(SVG_NS, "polyline");
-    line.setAttribute("points", points);
-    line.setAttribute("fill", "none");
-    line.setAttribute("stroke", "rgba(255, 255, 255, 0.95)");
-    line.setAttribute("stroke-width", "2.2");
-    line.setAttribute("stroke-linecap", "round");
-    line.setAttribute("stroke-linejoin", "round");
-    svg.appendChild(line);
+  // A handful of irregularly-spaced main cracks radiating outward, each
+  // bending once and throwing off one short branch — mimics real fracture lines
+  // instead of an even, jittery starburst.
+  const mainCount = 4 + Math.floor(Math.random() * 2);
+  const usedAngles = [];
+  for (let i = 0; i < mainCount; i++) {
+    let angle;
+    let attempts = 0;
+    do {
+      angle = Math.random() * Math.PI * 2;
+      attempts++;
+    } while (usedAngles.some((a) => Math.abs(a - angle) < 0.7) && attempts < 10);
+    usedAngles.push(angle);
+
+    const midDist = 38 + Math.random() * 10;
+    const midX = cx + Math.cos(angle) * midDist;
+    const midY = cy + Math.sin(angle) * midDist;
+    addCrackLine(svg, cx, cy, midX, midY, 2.6);
+
+    const bendAngle = angle + (Math.random() - 0.5) * 0.5;
+    const endDist = midDist + 40 + Math.random() * 15;
+    const endX = cx + Math.cos(bendAngle) * endDist;
+    const endY = cy + Math.sin(bendAngle) * endDist;
+    addCrackLine(svg, midX, midY, endX, endY, 1.8);
+
+    const branchAngle = bendAngle + (Math.random() < 0.5 ? 1 : -1) * (0.5 + Math.random() * 0.4);
+    const branchDist = 16 + Math.random() * 12;
+    const branchX = midX + Math.cos(branchAngle) * branchDist;
+    const branchY = midY + Math.sin(branchAngle) * branchDist;
+    addCrackLine(svg, midX, midY, branchX, branchY, 1.3);
   }
 
   el.crackOverlay.appendChild(svg);
