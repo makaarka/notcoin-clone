@@ -57,7 +57,17 @@ const el = {
   energyRegenVal: document.getElementById("energy-regen-val"),
   energyRegenCost: document.getElementById("energy-regen-cost"),
   upgradeEnergyBtn: document.getElementById("upgrade-energy-btn"),
+  particles: document.getElementById("particles"),
 };
+
+function spawnParticle(text) {
+  const p = document.createElement("div");
+  p.className = "particle";
+  p.textContent = text;
+  p.style.left = `${45 + Math.random() * 10}%`;
+  el.particles.appendChild(p);
+  setTimeout(() => p.remove(), 800);
+}
 
 function render() {
   el.balance.textContent = Math.floor(state.balance).toLocaleString("ru-RU");
@@ -84,6 +94,7 @@ function tap() {
   state.balance += state.tapPower;
   state.pendingTaps += 1;
   render();
+  spawnParticle(`+${state.tapPower}`);
 
   el.coin.classList.remove("tapped");
   void el.coin.offsetWidth;

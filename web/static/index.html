@@ -4,83 +4,114 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 <title>Coin Клон</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="/style.css" />
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
+
+<div class="bg-decor" aria-hidden="true">
+  <div class="glow glow-gold"></div>
+  <div class="glow glow-violet"></div>
+  <div class="bg-grid"></div>
+</div>
+
 <div class="app">
 
   <header class="topbar">
-    <div class="balance">
+    <div class="balance-pill">
       <span class="coin-icon">🪙</span>
       <span id="balance">0</span>
     </div>
   </header>
 
   <main id="screen-tap" class="screen active">
-    <div class="rank">Игрок</div>
-    <button id="coin" class="coin-btn" aria-label="Тапнуть">🪙</button>
-    <div class="energy-wrap">
-      <div class="energy-bar"><div id="energy-fill" class="energy-fill"></div></div>
-      <div class="energy-label"><span id="energy-cur">1000</span>/<span id="energy-max">1000</span> ⚡</div>
+    <div class="tap-card">
+      <div class="rank">Игрок</div>
+      <div class="coin-stage">
+        <div class="coin-ring"></div>
+        <button id="coin" class="coin-btn" aria-label="Тапнуть">
+          <span class="coin-face">🪙</span>
+        </button>
+        <div id="particles" class="particles"></div>
+      </div>
+      <div class="energy-wrap">
+        <div class="energy-row">
+          <span class="energy-icon">⚡</span>
+          <div class="energy-bar"><div id="energy-fill" class="energy-fill"></div></div>
+        </div>
+        <div class="energy-label"><span id="energy-cur">1000</span> / <span id="energy-max">1000</span></div>
+      </div>
     </div>
   </main>
 
   <main id="screen-tasks" class="screen">
-    <h2>Задания</h2>
+    <h2><span class="h-icon">📋</span>Задания</h2>
     <div id="tasks-list" class="list"></div>
   </main>
 
   <main id="screen-friends" class="screen">
-    <h2>Друзья</h2>
-    <p class="muted">Приглашено: <span id="ref-count">0</span></p>
-    <button id="copy-ref" class="primary-btn">Скопировать ссылку-приглашение</button>
+    <h2><span class="h-icon">👥</span>Друзья</h2>
+    <div class="friends-card">
+      <div class="friends-count-ring">
+        <span id="ref-count">0</span>
+      </div>
+      <p class="muted">приглашено друзей</p>
+      <button id="copy-ref" class="primary-btn">
+        <span>Скопировать ссылку-приглашение</span>
+      </button>
+    </div>
   </main>
 
   <main id="screen-upgrade" class="screen">
-    <h2>Прокачка</h2>
+    <h2><span class="h-icon">🚀</span>Прокачка</h2>
     <div class="list">
       <div class="upgrade-card">
+        <div class="upgrade-icon">👆</div>
         <div class="upgrade-info">
-          <span class="upgrade-title">👆 Сила тапа</span>
+          <span class="upgrade-title">Сила тапа</span>
           <span class="upgrade-desc">Сейчас: +<span id="tap-power-val">1</span> монета за тап</span>
         </div>
         <button id="upgrade-tap-btn" class="task-btn">
-          Улучшить (<span id="tap-power-cost">500</span> 🪙)
+          <span id="tap-power-cost">500</span> 🪙
         </button>
       </div>
       <div class="upgrade-card">
+        <div class="upgrade-icon">🤖</div>
         <div class="upgrade-info">
-          <span class="upgrade-title">🤖 Автокликер</span>
-          <span class="upgrade-desc">Уровень: <span id="auto-click-val">0</span> · монеты капают сами</span>
+          <span class="upgrade-title">Автокликер</span>
+          <span class="upgrade-desc">Уровень <span id="auto-click-val">0</span> · монеты капают сами</span>
         </div>
         <button id="upgrade-auto-btn" class="task-btn">
-          Улучшить (<span id="auto-click-cost">2000</span> 🪙)
+          <span id="auto-click-cost">2000</span> 🪙
         </button>
       </div>
       <div class="upgrade-card">
+        <div class="upgrade-icon">⚡</div>
         <div class="upgrade-info">
-          <span class="upgrade-title">⚡ Восстановление энергии</span>
+          <span class="upgrade-title">Восстановление энергии</span>
           <span class="upgrade-desc">Сейчас: <span id="energy-regen-val">0.33</span> ⚡/сек</span>
         </div>
         <button id="upgrade-energy-btn" class="task-btn">
-          Улучшить (<span id="energy-regen-cost">800</span> 🪙)
+          <span id="energy-regen-cost">800</span> 🪙
         </button>
       </div>
     </div>
   </main>
 
   <main id="screen-leaders" class="screen">
-    <h2>Таблица лидеров</h2>
+    <h2><span class="h-icon">🏆</span>Таблица лидеров</h2>
     <div id="leaders-list" class="list"></div>
   </main>
 
   <nav class="tabbar">
-    <button class="tab active" data-screen="screen-tap">🪙<span>Тап</span></button>
-    <button class="tab" data-screen="screen-tasks">📋<span>Задания</span></button>
-    <button class="tab" data-screen="screen-friends">👥<span>Друзья</span></button>
-    <button class="tab" data-screen="screen-leaders">🏆<span>Лидеры</span></button>
-    <button class="tab" data-screen="screen-upgrade">🚀<span>Прокачка</span></button>
+    <button class="tab active" data-screen="screen-tap"><span class="tab-icon">🪙</span><span>Тап</span></button>
+    <button class="tab" data-screen="screen-tasks"><span class="tab-icon">📋</span><span>Задания</span></button>
+    <button class="tab" data-screen="screen-friends"><span class="tab-icon">👥</span><span>Друзья</span></button>
+    <button class="tab" data-screen="screen-leaders"><span class="tab-icon">🏆</span><span>Лидеры</span></button>
+    <button class="tab" data-screen="screen-upgrade"><span class="tab-icon">🚀</span><span>Прокачка</span></button>
   </nav>
 
 </div>
