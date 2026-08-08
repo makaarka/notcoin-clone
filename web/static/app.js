@@ -62,6 +62,7 @@ const el = {
   combo: document.getElementById("combo"),
   comboVal: document.getElementById("combo-val"),
   bgDecor: document.querySelector(".bg-decor"),
+  crackOverlay: document.getElementById("crack-overlay"),
 };
 
 function spawnMilestoneFlash() {
@@ -112,8 +113,55 @@ function spawnShards(count) {
     s.style.setProperty("--dy", `${Math.sin(angle) * dist}px`);
     s.style.setProperty("--rot", `${Math.floor(Math.random() * 360 - 180)}deg`);
     el.particles.appendChild(s);
-    setTimeout(() => s.remove(), 600);
+    setTimeout(() => s.remove(), 700);
   }
+}
+
+const SVG_NS = "http://www.w3.org/2000/svg";
+function spawnCrack() {
+  const svg = document.createElementNS(SVG_NS, "svg");
+  svg.setAttribute("viewBox", "0 0 200 200");
+  svg.classList.add("crack-svg");
+
+  const cx = 100;
+  const cy = 100;
+  const branches = 6 + Math.floor(Math.random() * 3);
+  for (let i = 0; i < branches; i++) {
+    const baseAngle = (Math.PI * 2 * i) / branches + (Math.random() - 0.5) * 0.4;
+    const segments = 3 + Math.floor(Math.random() * 2);
+    let x = cx;
+    let y = cy;
+    let points = `${x},${y}`;
+    for (let s = 0; s < segments; s++) {
+      const dist = (95 / segments) * (s + 1);
+      const jitter = (Math.random() - 0.5) * 16;
+      const angle = baseAngle + (Math.random() - 0.5) * 0.3;
+      x = cx + Math.cos(angle) * dist + jitter;
+      y = cy + Math.sin(angle) * dist + jitter;
+      points += ` ${x.toFixed(1)},${y.toFixed(1)}`;
+    }
+
+    const shadow = document.createElementNS(SVG_NS, "polyline");
+    shadow.setAttribute("points", points);
+    shadow.setAttribute("fill", "none");
+    shadow.setAttribute("stroke", "rgba(90, 40, 0, 0.6)");
+    shadow.setAttribute("stroke-width", "4.5");
+    shadow.setAttribute("stroke-linecap", "round");
+    shadow.setAttribute("stroke-linejoin", "round");
+    svg.appendChild(shadow);
+
+    const line = document.createElementNS(SVG_NS, "polyline");
+    line.setAttribute("points", points);
+    line.setAttribute("fill", "none");
+    line.setAttribute("stroke", "rgba(255, 255, 255, 0.95)");
+    line.setAttribute("stroke-width", "2.2");
+    line.setAttribute("stroke-linecap", "round");
+    line.setAttribute("stroke-linejoin", "round");
+    svg.appendChild(line);
+  }
+
+  el.crackOverlay.appendChild(svg);
+  setTimeout(() => svg.remove(), 520);
 }
 
 const coinStageEl = document.querySelector(".coin-stage");
@@ -151,8 +199,9 @@ function registerCombo() {
   }, 1200);
 
   if (comboCount > 0 && comboCount % 10 === 0) {
+    spawnCrack();
     spawnSparks(10);
-    spawnShards(12);
+    spawnShards(14);
     shakeCoin();
     el.coin.classList.add("hot");
     spawnMilestoneFlash();
