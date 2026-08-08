@@ -9,7 +9,7 @@ WEBAPP_URL = os.getenv("WEBAPP_URL", "http://localhost:8000")
 HOST = os.getenv("HOST", "0.0.0.0")
 PORT = int(os.getenv("PORT", "8000"))
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "bot.db")
+DB_PATH = os.getenv("DB_PATH", os.path.join(os.path.dirname(__file__), "bot.db"))
 DATABASE_URL = f"sqlite+aiosqlite:///{DB_PATH}"
 
 # Game balance
