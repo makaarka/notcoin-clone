@@ -61,8 +61,15 @@ const el = {
   particles: document.getElementById("particles"),
   combo: document.getElementById("combo"),
   comboVal: document.getElementById("combo-val"),
-  glowGold: document.querySelector(".glow-gold"),
+  bgDecor: document.querySelector(".bg-decor"),
 };
+
+function spawnMilestoneFlash() {
+  const f = document.createElement("div");
+  f.className = "milestone-flash";
+  el.bgDecor.appendChild(f);
+  setTimeout(() => f.remove(), 550);
+}
 
 function spawnParticle(text) {
   const p = document.createElement("div");
@@ -114,9 +121,7 @@ function registerCombo() {
   if (comboCount > 0 && comboCount % 10 === 0) {
     spawnSparks(10);
     el.coin.classList.add("hot");
-    el.glowGold?.classList.remove("flash");
-    void el.glowGold?.offsetWidth;
-    el.glowGold?.classList.add("flash");
+    spawnMilestoneFlash();
     tg?.HapticFeedback?.impactOccurred("heavy");
     setTimeout(() => el.coin.classList.remove("hot"), 500);
   }
