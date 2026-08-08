@@ -102,6 +102,38 @@ function spawnRipple() {
   setTimeout(() => r.remove(), 650);
 }
 
+function spawnShards(count) {
+  for (let i = 0; i < count; i++) {
+    const s = document.createElement("div");
+    s.className = "shard";
+    const angle = Math.random() * Math.PI * 2;
+    const dist = 70 + Math.random() * 70;
+    s.style.setProperty("--dx", `${Math.cos(angle) * dist}px`);
+    s.style.setProperty("--dy", `${Math.sin(angle) * dist}px`);
+    s.style.setProperty("--rot", `${Math.floor(Math.random() * 360 - 180)}deg`);
+    el.particles.appendChild(s);
+    setTimeout(() => s.remove(), 600);
+  }
+}
+
+const coinStageEl = document.querySelector(".coin-stage");
+function shakeCoin() {
+  // Web Animations API instead of a CSS class so this never fights the
+  // looping "float-idle" CSS animation already running on .coin-stage
+  // (learned the hard way with the glow flash bug — see that fix).
+  coinStageEl.animate(
+    [
+      { transform: "translate(0, 0)" },
+      { transform: "translate(-5px, -3px)" },
+      { transform: "translate(5px, -6px)" },
+      { transform: "translate(-4px, -1px)" },
+      { transform: "translate(3px, -4px)" },
+      { transform: "translate(0, 0)" },
+    ],
+    { duration: 380, easing: "ease-out" }
+  );
+}
+
 let comboCount = 0;
 let comboTimer = null;
 function registerCombo() {
@@ -120,6 +152,8 @@ function registerCombo() {
 
   if (comboCount > 0 && comboCount % 10 === 0) {
     spawnSparks(10);
+    spawnShards(12);
+    shakeCoin();
     el.coin.classList.add("hot");
     spawnMilestoneFlash();
     tg?.HapticFeedback?.impactOccurred("heavy");

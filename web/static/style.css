@@ -350,6 +350,31 @@ h2 {
   100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1); }
 }
 
+.shard {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  background: linear-gradient(135deg, #fff3c4, var(--gold-2) 55%, var(--gold-3));
+  clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+  box-shadow: 0 0 6px rgba(245, 166, 35, 0.6);
+  opacity: 1;
+  transform: translate(-50%, -50%) rotate(0deg);
+  animation: shard-fly 0.55s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+  --dx: 0px;
+  --dy: 0px;
+  --rot: 0deg;
+}
+
+@keyframes shard-fly {
+  0% { opacity: 1; transform: translate(-50%, -50%) rotate(0deg) scale(1); }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(var(--rot)) scale(0.4);
+  }
+}
+
 .ripple {
   position: absolute;
   left: 50%;
