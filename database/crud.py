@@ -104,6 +104,7 @@ async def get_or_create_user(
         energy=config.ENERGY_MAX,
         energy_max=config.ENERGY_MAX,
         referrer_id=referrer_id,
+        referral_earnings_generated=config.REFERRAL_BONUS_REFERRER if referrer_id else 0,
     )
     session.add(user)
     await session.commit()

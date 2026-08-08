@@ -426,15 +426,7 @@ h2 {
   border: 1px solid rgba(124, 92, 255, 0.4);
 }
 
-.friend-item .name-col {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-.friend-item .name { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.friend-item .signup-bonus { font-size: 11px; color: var(--text-faint); }
+.friend-item .name { flex: 1; font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .friend-item .earned {
   flex-shrink: 0;

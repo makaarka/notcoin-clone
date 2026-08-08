@@ -271,13 +271,10 @@ async function loadFriends() {
       const initial = (f.username || "?").charAt(0).toUpperCase();
       item.innerHTML = `
         <span class="avatar">${initial}</span>
-        <span class="name-col">
-          <span class="name">${f.username}</span>
-          <span class="signup-bonus">+${f.signup_bonus.toLocaleString("ru-RU")} 🪙 за приглашение</span>
-        </span>
+        <span class="name">${f.username}</span>
         <span class="earned">
           <span class="amount">+${f.earned.toLocaleString("ru-RU")} 🪙</span>
-          <span class="amount-label">с заработка</span>
+          <span class="amount-label">заработано с друга</span>
         </span>
       `;
       el.friendsList.appendChild(item);

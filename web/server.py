@@ -194,7 +194,6 @@ async def api_friends(user: dict = Depends(get_current_user)) -> list[dict]:
             {
                 "username": f.username or f.first_name or f"Player{f.tg_id}",
                 "earned": f.referral_earnings_generated,
-                "signup_bonus": config.REFERRAL_BONUS_REFERRER,
             }
             for f in friends
         ]
