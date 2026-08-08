@@ -118,6 +118,7 @@ function spawnShards(count) {
 }
 
 const SVG_NS = "http://www.w3.org/2000/svg";
+const CRACK_COLOR = "rgba(25, 16, 8, 0.88)";
 
 function addCrackLine(svg, x1, y1, x2, y2, width) {
   const line = document.createElementNS(SVG_NS, "line");
@@ -125,61 +126,73 @@ function addCrackLine(svg, x1, y1, x2, y2, width) {
   line.setAttribute("y1", y1.toFixed(1));
   line.setAttribute("x2", x2.toFixed(1));
   line.setAttribute("y2", y2.toFixed(1));
-  line.setAttribute("stroke", "rgba(255, 255, 255, 0.92)");
+  line.setAttribute("stroke", CRACK_COLOR);
   line.setAttribute("stroke-width", width);
   line.setAttribute("stroke-linecap", "round");
   svg.appendChild(line);
 }
 
-function spawnCrack() {
+function clearCracks() {
+  el.crackOverlay.innerHTML = "";
+}
+
+// Damage escalates with combo: tier 1 stays out on the gold rim (clear of the
+// eagle emblem in the middle), tiers 2-3 spread wider and get denser.
+const CRACK_TIER_CONFIG = {
+  1: { count: 3, rMin: 55, rMax: 88, branchChance: 0.25 },
+  2: { count: 6, rMin: 45, rMax: 94, branchChance: 0.5 },
+  3: { count: 12, rMin: 20, rMax: 98, branchChance: 0.85 },
+};
+
+function drawCracks(tier) {
+  clearCracks();
+  const cfg = CRACK_TIER_CONFIG[tier];
+  if (!cfg) return;
+
   const svg = document.createElementNS(SVG_NS, "svg");
   svg.setAttribute("viewBox", "0 0 200 200");
   svg.classList.add("crack-svg");
 
   const cx = 100;
   const cy = 100;
-
-  // A tight little web at the impact point for an anchor
-  for (let i = 0; i < 5; i++) {
-    const angle = Math.random() * Math.PI * 2;
-    const dist = 6 + Math.random() * 6;
-    addCrackLine(svg, cx, cy, cx + Math.cos(angle) * dist, cy + Math.sin(angle) * dist, 2);
-  }
-
-  // A handful of irregularly-spaced main cracks radiating outward, each
-  // bending once and throwing off one short branch — mimics real fracture lines
-  // instead of an even, jittery starburst.
-  const mainCount = 4 + Math.floor(Math.random() * 2);
+  const span = cfg.rMax - cfg.rMin;
   const usedAngles = [];
-  for (let i = 0; i < mainCount; i++) {
+
+  for (let i = 0; i < cfg.count; i++) {
     let angle;
     let attempts = 0;
     do {
       angle = Math.random() * Math.PI * 2;
       attempts++;
-    } while (usedAngles.some((a) => Math.abs(a - angle) < 0.7) && attempts < 10);
+    } while (usedAngles.some((a) => Math.abs(a - angle) < 0.35) && attempts < 12);
     usedAngles.push(angle);
 
-    const midDist = 38 + Math.random() * 10;
-    const midX = cx + Math.cos(angle) * midDist;
-    const midY = cy + Math.sin(angle) * midDist;
-    addCrackLine(svg, cx, cy, midX, midY, 2.6);
+    const startR = cfg.rMin + Math.random() * span * 0.2;
+    const midR = cfg.rMin + span * 0.35 + Math.random() * span * 0.25;
+    const endR = Math.min(cfg.rMin + span * 0.7 + Math.random() * span * 0.3, 98);
 
+    const sx = cx + Math.cos(angle) * startR;
+    const sy = cy + Math.sin(angle) * startR;
     const bendAngle = angle + (Math.random() - 0.5) * 0.5;
-    const endDist = midDist + 40 + Math.random() * 15;
-    const endX = cx + Math.cos(bendAngle) * endDist;
-    const endY = cy + Math.sin(bendAngle) * endDist;
-    addCrackLine(svg, midX, midY, endX, endY, 1.8);
+    const mx = cx + Math.cos(bendAngle) * midR;
+    const my = cy + Math.sin(bendAngle) * midR;
+    const endAngle = bendAngle + (Math.random() - 0.5) * 0.4;
+    const ex = cx + Math.cos(endAngle) * endR;
+    const ey = cy + Math.sin(endAngle) * endR;
 
-    const branchAngle = bendAngle + (Math.random() < 0.5 ? 1 : -1) * (0.5 + Math.random() * 0.4);
-    const branchDist = 16 + Math.random() * 12;
-    const branchX = midX + Math.cos(branchAngle) * branchDist;
-    const branchY = midY + Math.sin(branchAngle) * branchDist;
-    addCrackLine(svg, midX, midY, branchX, branchY, 1.3);
+    addCrackLine(svg, sx, sy, mx, my, 2.4);
+    addCrackLine(svg, mx, my, ex, ey, 1.6);
+
+    if (Math.random() < cfg.branchChance) {
+      const branchAngle = bendAngle + (Math.random() < 0.5 ? 1 : -1) * (0.5 + Math.random() * 0.4);
+      const branchDist = 14 + Math.random() * 14;
+      const bx = mx + Math.cos(branchAngle) * branchDist;
+      const by = my + Math.sin(branchAngle) * branchDist;
+      addCrackLine(svg, mx, my, bx, by, 1.2);
+    }
   }
 
   el.crackOverlay.appendChild(svg);
-  setTimeout(() => svg.remove(), 520);
 }
 
 const coinStageEl = document.querySelector(".coin-stage");
@@ -200,8 +213,45 @@ function shakeCoin() {
   );
 }
 
+const EXPLODE_AT = 100;
+
 let comboCount = 0;
 let comboTimer = null;
+let crackTier = 0;
+let coinExploded = false;
+
+function healCoin() {
+  comboCount = 0;
+  crackTier = 0;
+  clearCracks();
+  el.combo.classList.remove("show");
+}
+
+function explodeCoin() {
+  coinExploded = true;
+  spawnSparks(18);
+  spawnShards(28);
+  shakeCoin();
+  spawnMilestoneFlash();
+  tg?.HapticFeedback?.notificationOccurred("error");
+  el.coin.classList.add("exploded");
+  el.combo.classList.remove("show");
+
+  setTimeout(() => {
+    healCoin();
+    coinExploded = false;
+    el.coin.classList.remove("exploded");
+    el.coin.animate(
+      [
+        { transform: "scale(0.3)", opacity: 0 },
+        { transform: "scale(1.1)", opacity: 1, offset: 0.7 },
+        { transform: "scale(1)", opacity: 1 },
+      ],
+      { duration: 420, easing: "ease-out" }
+    );
+  }, 2000);
+}
+
 function registerCombo() {
   comboCount += 1;
   el.comboVal.textContent = comboCount;
@@ -211,19 +261,26 @@ function registerCombo() {
   el.combo.classList.add("pop");
 
   clearTimeout(comboTimer);
-  comboTimer = setTimeout(() => {
-    comboCount = 0;
-    el.combo.classList.remove("show");
-  }, 1200);
+  comboTimer = setTimeout(healCoin, 1200);
 
-  if (comboCount > 0 && comboCount % 10 === 0) {
-    spawnCrack();
-    spawnSparks(10);
-    spawnShards(14);
+  if (comboCount >= EXPLODE_AT) {
+    explodeCoin();
+    return;
+  }
+
+  let targetTier = 0;
+  if (comboCount >= 50) targetTier = 3;
+  else if (comboCount >= 20) targetTier = 2;
+  else if (comboCount >= 10) targetTier = 1;
+
+  if (targetTier > crackTier) {
+    crackTier = targetTier;
+    drawCracks(crackTier);
+    spawnSparks(4 + crackTier * 4);
     shakeCoin();
     el.coin.classList.add("hot");
     spawnMilestoneFlash();
-    tg?.HapticFeedback?.impactOccurred("heavy");
+    tg?.HapticFeedback?.impactOccurred(crackTier === 3 ? "heavy" : "medium");
     setTimeout(() => el.coin.classList.remove("hot"), 500);
   }
 }
@@ -248,6 +305,7 @@ function render() {
 }
 
 function tap() {
+  if (coinExploded) return;
   if (state.energy < 1) return;
   state.energy -= 1;
   state.balance += state.tapPower;
