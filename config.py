@@ -18,8 +18,9 @@ ENERGY_MAX = 1000
 ENERGY_REGEN_PER_SEC = 1 / 3  # 1 energy every 3 seconds
 TAP_MAX_PER_REQUEST = 50  # anti-cheat cap per single sync call
 
-REFERRAL_BONUS_REFERRER = 5000
+REFERRAL_BONUS_REFERRER = 2500
 REFERRAL_BONUS_REFERRED = 1000
+REFERRAL_COMMISSION_RATE = 0.10  # referrer keeps earning this share of every friend's income
 
 # Upgrades
 TAP_UPGRADE_BASE_COST = 500  # cost to go from level N -> N+1 = TAP_UPGRADE_BASE_COST * N

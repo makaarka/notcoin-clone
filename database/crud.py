@@ -25,24 +25,41 @@ def _regen_energy(user: User) -> None:
         user.energy_updated_at = now
 
 
-def _apply_auto_income(user: User) -> None:
-    """Credit passive coins earned from the auto-click upgrade since last sync."""
+def _apply_auto_income(user: User) -> int:
+    """Credit passive coins earned from the auto-click upgrade since last sync.
+    Returns the amount credited (0 if none), so callers can pass a referral cut upstream."""
     now = datetime.datetime.utcnow()
     elapsed = (now - user.auto_income_updated_at).total_seconds()
     if elapsed <= 0:
-        return
+        return 0
     if user.auto_click_level <= 0:
         user.auto_income_updated_at = now
-        return
+        return 0
     earned = int(elapsed * user.auto_click_level * config.AUTO_CLICK_RATE_PER_LEVEL)
     if earned > 0:
         user.balance += earned
         user.auto_income_updated_at = now
+    return earned
 
 
-def _sync_user(user: User) -> None:
+async def _credit_referrer(session: AsyncSession, user: User, earned: int) -> None:
+    """Give the user's referrer their ongoing commission cut of a freshly earned amount."""
+    if earned <= 0 or user.referrer_id is None:
+        return
+    commission = int(earned * config.REFERRAL_COMMISSION_RATE)
+    if commission <= 0:
+        return
+    referrer = await session.get(User, user.referrer_id)
+    if referrer is None:
+        return
+    referrer.balance += commission
+    user.referral_earnings_generated += commission
+
+
+async def _sync_user(session: AsyncSession, user: User) -> None:
     _regen_energy(user)
-    _apply_auto_income(user)
+    auto_earned = _apply_auto_income(user)
+    await _credit_referrer(session, user, auto_earned)
 
 
 def get_tap_upgrade_cost(user: User) -> int:
@@ -67,7 +84,7 @@ async def get_or_create_user(
     result = await session.execute(select(User).where(User.tg_id == tg_id))
     user = result.scalar_one_or_none()
     if user is not None:
-        _sync_user(user)
+        await _sync_user(session, user)
         await session.commit()
         return user, False
 
@@ -98,24 +115,26 @@ async def get_user_by_tg_id(session: AsyncSession, tg_id: int) -> User | None:
     result = await session.execute(select(User).where(User.tg_id == tg_id))
     user = result.scalar_one_or_none()
     if user is not None:
-        _sync_user(user)
+        await _sync_user(session, user)
         await session.commit()
     return user
 
 
 async def apply_tap(session: AsyncSession, user: User, taps: int) -> User:
-    _sync_user(user)
+    await _sync_user(session, user)
     taps = max(0, min(taps, config.TAP_MAX_PER_REQUEST))
     taps = min(taps, user.energy)
     user.energy -= taps
-    user.balance += taps * user.tap_power
+    tap_earned = taps * user.tap_power
+    user.balance += tap_earned
+    await _credit_referrer(session, user, tap_earned)
     await session.commit()
     await session.refresh(user)
     return user
 
 
 async def upgrade_tap_power(session: AsyncSession, user: User) -> bool:
-    _sync_user(user)
+    await _sync_user(session, user)
     cost = get_tap_upgrade_cost(user)
     if user.balance < cost:
         await session.commit()
@@ -128,7 +147,7 @@ async def upgrade_tap_power(session: AsyncSession, user: User) -> bool:
 
 
 async def upgrade_auto_click(session: AsyncSession, user: User) -> bool:
-    _sync_user(user)
+    await _sync_user(session, user)
     cost = get_auto_click_upgrade_cost(user)
     if user.balance < cost:
         await session.commit()
@@ -141,7 +160,7 @@ async def upgrade_auto_click(session: AsyncSession, user: User) -> bool:
 
 
 async def upgrade_energy_regen(session: AsyncSession, user: User) -> bool:
-    _sync_user(user)
+    await _sync_user(session, user)
     cost = get_energy_regen_upgrade_cost(user)
     if user.balance < cost:
         await session.commit()
@@ -168,6 +187,7 @@ async def complete_task(session: AsyncSession, user: User, task: Task) -> bool:
     if task.id in completed:
         return False
     user.balance += task.reward
+    await _credit_referrer(session, user, task.reward)
     session.add(UserTask(user_id=user.id, task_id=task.id))
     await session.commit()
     return True
@@ -178,6 +198,13 @@ async def get_referral_count(session: AsyncSession, user_id: int) -> int:
         select(func.count()).select_from(User).where(User.referrer_id == user_id)
     )
     return result.scalar_one()
+
+
+async def get_referrals(session: AsyncSession, user_id: int) -> list[User]:
+    result = await session.execute(
+        select(User).where(User.referrer_id == user_id).order_by(User.referral_earnings_generated.desc())
+    )
+    return list(result.scalars().all())
 
 
 async def get_leaderboard(session: AsyncSession, limit: int = 100) -> list[User]:

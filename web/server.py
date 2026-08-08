@@ -21,6 +21,7 @@ from database.crud import (
     get_leaderboard,
     get_or_create_user,
     get_referral_count,
+    get_referrals,
     get_tap_upgrade_cost,
     upgrade_auto_click,
     upgrade_energy_regen,
@@ -183,6 +184,19 @@ async def api_claim_task(task_id: int, user: dict = Depends(get_current_user)) -
             raise HTTPException(status_code=400, detail="task already completed")
         await session.refresh(db_user)
         return _user_to_dict(db_user)
+
+
+@app.get("/api/friends")
+async def api_friends(user: dict = Depends(get_current_user)) -> list[dict]:
+    async with get_session() as session:
+        friends = await get_referrals(session, user["id"])
+        return [
+            {
+                "username": f.username or f.first_name or f"Player{f.tg_id}",
+                "earned": f.referral_earnings_generated,
+            }
+            for f in friends
+        ]
 
 
 @app.get("/api/leaderboard")

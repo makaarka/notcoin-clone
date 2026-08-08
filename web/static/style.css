@@ -311,7 +311,7 @@ h2 {
   padding-bottom: 8px;
 }
 
-.task-item, .upgrade-card, .leader-item {
+.task-item, .upgrade-card, .leader-item, .friend-item {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -397,13 +397,54 @@ h2 {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 24px;
-  padding: 28px 20px;
+  margin-top: 10px;
+  margin-bottom: 18px;
+  padding: 24px 20px;
   background: var(--card);
   border: 1px solid var(--card-border);
   border-radius: var(--radius-lg);
   backdrop-filter: blur(10px);
   box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+
+.friends-card .muted { text-align: center; max-width: 260px; }
+
+.friends-list { width: 100%; }
+
+.friend-item .avatar {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  background: radial-gradient(circle at 35% 30%, rgba(124,92,255,0.4), rgba(124,92,255,0.1));
+  border: 1px solid rgba(124, 92, 255, 0.4);
+}
+
+.friend-item .name { flex: 1; font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.friend-item .earned {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+}
+
+.friend-item .earned .amount { font-family: var(--font-display); font-weight: 700; color: var(--gold-1); font-size: 14.5px; }
+.friend-item .earned .amount-label { font-size: 10.5px; color: var(--text-faint); }
+
+.empty-state {
+  width: 100%;
+  text-align: center;
+  padding: 20px 10px;
+  color: var(--text-faint);
+  font-size: 13.5px;
 }
 
 .friends-count-ring {

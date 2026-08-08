@@ -46,6 +46,7 @@ const el = {
   energyMax: document.getElementById("energy-max"),
   tasksList: document.getElementById("tasks-list"),
   leadersList: document.getElementById("leaders-list"),
+  friendsList: document.getElementById("friends-list"),
   refCount: document.getElementById("ref-count"),
   copyRefBtn: document.getElementById("copy-ref"),
   tapPowerVal: document.getElementById("tap-power-val"),
@@ -181,7 +182,7 @@ document.querySelectorAll(".tab").forEach((btn) => {
 
     if (btn.dataset.screen === "screen-tasks") loadTasks();
     if (btn.dataset.screen === "screen-leaders") loadLeaders();
-    if (btn.dataset.screen === "screen-friends") loadMe();
+    if (btn.dataset.screen === "screen-friends") { loadMe(); loadFriends(); }
     if (btn.dataset.screen === "screen-upgrade") loadMe();
   });
 });
@@ -252,6 +253,34 @@ async function loadMe() {
     state.refLink = data.ref_link;
   } catch (e) {
     console.error(e);
+  }
+}
+
+async function loadFriends() {
+  el.friendsList.innerHTML = "<p class='muted'>Загрузка...</p>";
+  try {
+    const friends = await api("/api/friends");
+    if (friends.length === 0) {
+      el.friendsList.innerHTML = "<p class='empty-state'>Пока никого не пригласил — поделись ссылкой выше</p>";
+      return;
+    }
+    el.friendsList.innerHTML = "";
+    friends.forEach((f) => {
+      const item = document.createElement("div");
+      item.className = "friend-item";
+      const initial = (f.username || "?").charAt(0).toUpperCase();
+      item.innerHTML = `
+        <span class="avatar">${initial}</span>
+        <span class="name">${f.username}</span>
+        <span class="earned">
+          <span class="amount">+${f.earned.toLocaleString("ru-RU")} 🪙</span>
+          <span class="amount-label">заработано с друга</span>
+        </span>
+      `;
+      el.friendsList.appendChild(item);
+    });
+  } catch (e) {
+    el.friendsList.innerHTML = "<p class='muted'>Не удалось загрузить список</p>";
   }
 }
 
