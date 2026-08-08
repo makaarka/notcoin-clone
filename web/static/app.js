@@ -62,7 +62,6 @@ const el = {
   combo: document.getElementById("combo"),
   comboVal: document.getElementById("combo-val"),
   bgDecor: document.querySelector(".bg-decor"),
-  crackOverlay: document.getElementById("crack-overlay"),
 };
 
 function spawnMilestoneFlash() {
@@ -117,86 +116,6 @@ function spawnShards(count) {
   }
 }
 
-const SVG_NS = "http://www.w3.org/2000/svg";
-const CRACK_COLOR = "rgba(25, 16, 8, 0.88)";
-
-function addCrackLine(svg, x1, y1, x2, y2, width) {
-  const line = document.createElementNS(SVG_NS, "line");
-  line.setAttribute("x1", x1.toFixed(1));
-  line.setAttribute("y1", y1.toFixed(1));
-  line.setAttribute("x2", x2.toFixed(1));
-  line.setAttribute("y2", y2.toFixed(1));
-  line.setAttribute("stroke", CRACK_COLOR);
-  line.setAttribute("stroke-width", width);
-  line.setAttribute("stroke-linecap", "round");
-  svg.appendChild(line);
-}
-
-let crackSvgEl = null;
-
-function clearCracks() {
-  el.crackOverlay.innerHTML = "";
-  crackSvgEl = null;
-}
-
-function getCrackSvg() {
-  if (crackSvgEl) return crackSvgEl;
-  const svg = document.createElementNS(SVG_NS, "svg");
-  svg.setAttribute("viewBox", "0 0 200 200");
-  svg.classList.add("crack-svg");
-  el.crackOverlay.appendChild(svg);
-  crackSvgEl = svg;
-  return svg;
-}
-
-// Damage escalates with combo: tier 1 stays out on the gold rim (clear of the
-// eagle emblem in the middle), tiers 2-3 spread wider and get denser. Each
-// tier only ADDS its cracks on top of whatever is already drawn, so earlier
-// cracks stay put instead of the whole pattern jumping to a new random one.
-const CRACK_TIER_CONFIG = {
-  1: { addCount: 3, rMin: 55, rMax: 88, branchChance: 0.25 },
-  2: { addCount: 4, rMin: 45, rMax: 94, branchChance: 0.5 },
-  3: { addCount: 6, rMin: 20, rMax: 98, branchChance: 0.85 },
-};
-
-function growCracks(tier) {
-  const cfg = CRACK_TIER_CONFIG[tier];
-  if (!cfg) return;
-
-  const svg = getCrackSvg();
-  const cx = 100;
-  const cy = 100;
-  const span = cfg.rMax - cfg.rMin;
-
-  for (let i = 0; i < cfg.addCount; i++) {
-    const angle = Math.random() * Math.PI * 2;
-
-    const startR = cfg.rMin + Math.random() * span * 0.2;
-    const midR = cfg.rMin + span * 0.35 + Math.random() * span * 0.25;
-    const endR = Math.min(cfg.rMin + span * 0.7 + Math.random() * span * 0.3, 98);
-
-    const sx = cx + Math.cos(angle) * startR;
-    const sy = cy + Math.sin(angle) * startR;
-    const bendAngle = angle + (Math.random() - 0.5) * 0.5;
-    const mx = cx + Math.cos(bendAngle) * midR;
-    const my = cy + Math.sin(bendAngle) * midR;
-    const endAngle = bendAngle + (Math.random() - 0.5) * 0.4;
-    const ex = cx + Math.cos(endAngle) * endR;
-    const ey = cy + Math.sin(endAngle) * endR;
-
-    addCrackLine(svg, sx, sy, mx, my, 2.4);
-    addCrackLine(svg, mx, my, ex, ey, 1.6);
-
-    if (Math.random() < cfg.branchChance) {
-      const branchAngle = bendAngle + (Math.random() < 0.5 ? 1 : -1) * (0.5 + Math.random() * 0.4);
-      const branchDist = 14 + Math.random() * 14;
-      const bx = mx + Math.cos(branchAngle) * branchDist;
-      const by = my + Math.sin(branchAngle) * branchDist;
-      addCrackLine(svg, mx, my, bx, by, 1.2);
-    }
-  }
-}
-
 const coinStageEl = document.querySelector(".coin-stage");
 function shakeCoin() {
   // Web Animations API instead of a CSS class so this never fights the
@@ -219,13 +138,12 @@ const EXPLODE_AT = 100;
 
 let comboCount = 0;
 let comboTimer = null;
-let crackTier = 0;
+let comboTier = 0;
 let coinExploded = false;
 
 function healCoin() {
   comboCount = 0;
-  crackTier = 0;
-  clearCracks();
+  comboTier = 0;
   el.combo.classList.remove("show");
 }
 
@@ -275,14 +193,13 @@ function registerCombo() {
   else if (comboCount >= 20) targetTier = 2;
   else if (comboCount >= 10) targetTier = 1;
 
-  if (targetTier > crackTier) {
-    crackTier = targetTier;
-    growCracks(crackTier);
-    spawnSparks(4 + crackTier * 4);
+  if (targetTier > comboTier) {
+    comboTier = targetTier;
+    spawnSparks(4 + comboTier * 4);
     shakeCoin();
     el.coin.classList.add("hot");
     spawnMilestoneFlash();
-    tg?.HapticFeedback?.impactOccurred(crackTier === 3 ? "heavy" : "medium");
+    tg?.HapticFeedback?.impactOccurred(comboTier === 3 ? "heavy" : "medium");
     setTimeout(() => el.coin.classList.remove("hot"), 500);
   }
 }
