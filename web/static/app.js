@@ -59,6 +59,9 @@ const el = {
   energyRegenCost: document.getElementById("energy-regen-cost"),
   upgradeEnergyBtn: document.getElementById("upgrade-energy-btn"),
   particles: document.getElementById("particles"),
+  combo: document.getElementById("combo"),
+  comboVal: document.getElementById("combo-val"),
+  glowGold: document.querySelector(".glow-gold"),
 };
 
 function spawnParticle(text) {
@@ -68,6 +71,55 @@ function spawnParticle(text) {
   p.style.left = `${45 + Math.random() * 10}%`;
   el.particles.appendChild(p);
   setTimeout(() => p.remove(), 800);
+}
+
+const SPARK_EMOJIS = ["✨", "⭐", "💫"];
+function spawnSparks(count) {
+  for (let i = 0; i < count; i++) {
+    const s = document.createElement("span");
+    s.className = "spark";
+    s.textContent = SPARK_EMOJIS[Math.floor(Math.random() * SPARK_EMOJIS.length)];
+    const angle = Math.random() * Math.PI * 2;
+    const dist = 50 + Math.random() * 50;
+    s.style.setProperty("--dx", `${Math.cos(angle) * dist}px`);
+    s.style.setProperty("--dy", `${Math.sin(angle) * dist}px`);
+    el.particles.appendChild(s);
+    setTimeout(() => s.remove(), 650);
+  }
+}
+
+function spawnRipple() {
+  const r = document.createElement("div");
+  r.className = "ripple";
+  el.particles.appendChild(r);
+  setTimeout(() => r.remove(), 650);
+}
+
+let comboCount = 0;
+let comboTimer = null;
+function registerCombo() {
+  comboCount += 1;
+  el.comboVal.textContent = comboCount;
+  el.combo.classList.add("show");
+  el.combo.classList.remove("pop");
+  void el.combo.offsetWidth;
+  el.combo.classList.add("pop");
+
+  clearTimeout(comboTimer);
+  comboTimer = setTimeout(() => {
+    comboCount = 0;
+    el.combo.classList.remove("show");
+  }, 1200);
+
+  if (comboCount > 0 && comboCount % 10 === 0) {
+    spawnSparks(10);
+    el.coin.classList.add("hot");
+    el.glowGold?.classList.remove("flash");
+    void el.glowGold?.offsetWidth;
+    el.glowGold?.classList.add("flash");
+    tg?.HapticFeedback?.impactOccurred("heavy");
+    setTimeout(() => el.coin.classList.remove("hot"), 500);
+  }
 }
 
 function render() {
@@ -96,7 +148,12 @@ function tap() {
   state.pendingTaps += 1;
   render();
   spawnParticle(`+${state.tapPower}`);
+  spawnSparks(2);
+  spawnRipple();
+  registerCombo();
 
+  const face = el.coin.querySelector(".coin-face");
+  face.style.setProperty("--pop-rot", `${(Math.random() * 10 - 5).toFixed(1)}deg`);
   el.coin.classList.remove("tapped");
   void el.coin.offsetWidth;
   el.coin.classList.add("tapped");
