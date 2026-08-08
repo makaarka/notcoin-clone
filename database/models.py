@@ -29,6 +29,7 @@ class User(Base):
     auto_income_updated_at: Mapped[datetime.datetime] = mapped_column(
         DateTime, default=datetime.datetime.utcnow
     )
+    energy_regen_level: Mapped[int] = mapped_column(Integer, default=0)
 
     referrer_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id"), nullable=True)
 

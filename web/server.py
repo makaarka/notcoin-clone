@@ -10,16 +10,20 @@ import config
 from database.db import get_session, init_db
 from database.models import Task, User
 from database.crud import (
+    admin_set_balance,
     apply_tap,
     complete_task,
     get_active_tasks,
     get_auto_click_upgrade_cost,
     get_completed_task_ids,
+    get_energy_regen_rate,
+    get_energy_regen_upgrade_cost,
     get_leaderboard,
     get_or_create_user,
     get_referral_count,
     get_tap_upgrade_cost,
     upgrade_auto_click,
+    upgrade_energy_regen,
     upgrade_tap_power,
 )
 from web.auth import InvalidInitData, validate_init_data
@@ -79,8 +83,11 @@ def _user_to_dict(user: User) -> dict:
         "energy_max": user.energy_max,
         "tap_power": user.tap_power,
         "auto_click_level": user.auto_click_level,
+        "energy_regen_level": user.energy_regen_level,
+        "energy_regen_per_sec": get_energy_regen_rate(user),
         "tap_upgrade_cost": get_tap_upgrade_cost(user),
         "auto_click_upgrade_cost": get_auto_click_upgrade_cost(user),
+        "energy_regen_upgrade_cost": get_energy_regen_upgrade_cost(user),
     }
 
 
@@ -119,6 +126,16 @@ async def api_upgrade_auto(user: dict = Depends(get_current_user)) -> dict:
     async with get_session() as session:
         db_user = await session.get(User, user["id"])
         ok = await upgrade_auto_click(session, db_user)
+        if not ok:
+            raise HTTPException(status_code=400, detail="not enough balance")
+        return _user_to_dict(db_user)
+
+
+@app.post("/api/upgrade/energy")
+async def api_upgrade_energy(user: dict = Depends(get_current_user)) -> dict:
+    async with get_session() as session:
+        db_user = await session.get(User, user["id"])
+        ok = await upgrade_energy_regen(session, db_user)
         if not ok:
             raise HTTPException(status_code=400, detail="not enough balance")
         return _user_to_dict(db_user)
@@ -169,6 +186,24 @@ async def api_leaderboard() -> list[dict]:
             }
             for i, u in enumerate(top)
         ]
+
+
+class AdminSetBalanceRequest(BaseModel):
+    username: str
+    balance: int
+
+
+@app.post("/api/admin/set-balance")
+async def api_admin_set_balance(
+    body: AdminSetBalanceRequest, x_admin_secret: str = Header(..., alias="X-Admin-Secret")
+) -> dict:
+    if not config.ADMIN_SECRET or x_admin_secret != config.ADMIN_SECRET:
+        raise HTTPException(status_code=403, detail="forbidden")
+    async with get_session() as session:
+        user = await admin_set_balance(session, body.username, body.balance)
+        if user is None:
+            raise HTTPException(status_code=404, detail="user not found")
+        return _user_to_dict(user)
 
 
 app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")

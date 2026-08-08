@@ -28,8 +28,11 @@ const state = {
   energyMax: 1000,
   tapPower: 1,
   autoClickLevel: 0,
+  energyRegenLevel: 0,
+  energyRegenPerSec: 1 / 3,
   tapUpgradeCost: 500,
   autoClickUpgradeCost: 2000,
+  energyRegenUpgradeCost: 800,
   pendingTaps: 0,
   refLink: "",
 };
@@ -50,6 +53,9 @@ const el = {
   autoClickCost: document.getElementById("auto-click-cost"),
   upgradeTapBtn: document.getElementById("upgrade-tap-btn"),
   upgradeAutoBtn: document.getElementById("upgrade-auto-btn"),
+  energyRegenVal: document.getElementById("energy-regen-val"),
+  energyRegenCost: document.getElementById("energy-regen-cost"),
+  upgradeEnergyBtn: document.getElementById("upgrade-energy-btn"),
 };
 
 function render() {
@@ -65,6 +71,10 @@ function render() {
   el.autoClickCost.textContent = state.autoClickUpgradeCost.toLocaleString("ru-RU");
   el.upgradeTapBtn.disabled = state.balance < state.tapUpgradeCost;
   el.upgradeAutoBtn.disabled = state.balance < state.autoClickUpgradeCost;
+
+  el.energyRegenVal.textContent = state.energyRegenPerSec.toFixed(2);
+  el.energyRegenCost.textContent = state.energyRegenUpgradeCost.toLocaleString("ru-RU");
+  el.upgradeEnergyBtn.disabled = state.balance < state.energyRegenUpgradeCost;
 }
 
 function tap() {
@@ -117,8 +127,11 @@ function syncFromServer(data) {
   state.energyMax = data.energy_max;
   state.tapPower = data.tap_power;
   state.autoClickLevel = data.auto_click_level;
+  state.energyRegenLevel = data.energy_regen_level;
+  state.energyRegenPerSec = data.energy_regen_per_sec;
   state.tapUpgradeCost = data.tap_upgrade_cost;
   state.autoClickUpgradeCost = data.auto_click_upgrade_cost;
+  state.energyRegenUpgradeCost = data.energy_regen_upgrade_cost;
   render();
 }
 
@@ -127,10 +140,10 @@ el.coin.addEventListener("click", () => {
   scheduleFlush();
 });
 
-// Regenerate energy locally between server syncs (visual only, ~1 per 3s matches backend rate)
+// Regenerate energy locally between server syncs (visual only, matches backend rate/upgrades)
 setInterval(() => {
   if (state.energy < state.energyMax) {
-    state.energy = Math.min(state.energyMax, state.energy + 1 / 3);
+    state.energy = Math.min(state.energyMax, state.energy + state.energyRegenPerSec);
     render();
   }
 }, 1000);
@@ -245,6 +258,15 @@ el.upgradeTapBtn.addEventListener("click", async () => {
 el.upgradeAutoBtn.addEventListener("click", async () => {
   try {
     const data = await api("/api/upgrade/auto", { method: "POST" });
+    syncFromServer(data);
+  } catch (e) {
+    notify(e.status === 400 ? "Недостаточно монет" : "Ошибка, попробуй ещё раз");
+  }
+});
+
+el.upgradeEnergyBtn.addEventListener("click", async () => {
+  try {
+    const data = await api("/api/upgrade/energy", { method: "POST" });
     syncFromServer(data);
   } catch (e) {
     notify(e.status === 400 ? "Недостаточно монет" : "Ошибка, попробуй ещё раз");

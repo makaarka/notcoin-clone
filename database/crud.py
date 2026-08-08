@@ -9,13 +9,17 @@ import config
 from database.models import Task, User, UserTask
 
 
+def get_energy_regen_rate(user: User) -> float:
+    return config.ENERGY_REGEN_PER_SEC + user.energy_regen_level * config.ENERGY_REGEN_BONUS_PER_LEVEL
+
+
 def _regen_energy(user: User) -> None:
     """Recompute current energy based on elapsed time, capped at energy_max."""
     now = datetime.datetime.utcnow()
     elapsed = (now - user.energy_updated_at).total_seconds()
     if elapsed <= 0:
         return
-    regenerated = int(elapsed * config.ENERGY_REGEN_PER_SEC)
+    regenerated = int(elapsed * get_energy_regen_rate(user))
     if regenerated > 0:
         user.energy = min(user.energy_max, user.energy + regenerated)
         user.energy_updated_at = now
@@ -47,6 +51,10 @@ def get_tap_upgrade_cost(user: User) -> int:
 
 def get_auto_click_upgrade_cost(user: User) -> int:
     return config.AUTO_CLICK_BASE_COST * (user.auto_click_level + 1)
+
+
+def get_energy_regen_upgrade_cost(user: User) -> int:
+    return config.ENERGY_REGEN_UPGRADE_BASE_COST * (user.energy_regen_level + 1)
 
 
 async def get_or_create_user(
@@ -132,6 +140,19 @@ async def upgrade_auto_click(session: AsyncSession, user: User) -> bool:
     return True
 
 
+async def upgrade_energy_regen(session: AsyncSession, user: User) -> bool:
+    _sync_user(user)
+    cost = get_energy_regen_upgrade_cost(user)
+    if user.balance < cost:
+        await session.commit()
+        return False
+    user.balance -= cost
+    user.energy_regen_level += 1
+    await session.commit()
+    await session.refresh(user)
+    return True
+
+
 async def get_active_tasks(session: AsyncSession) -> list[Task]:
     result = await session.execute(select(Task).where(Task.is_active.is_(True)))
     return list(result.scalars().all())
@@ -162,3 +183,14 @@ async def get_referral_count(session: AsyncSession, user_id: int) -> int:
 async def get_leaderboard(session: AsyncSession, limit: int = 100) -> list[User]:
     result = await session.execute(select(User).order_by(User.balance.desc()).limit(limit))
     return list(result.scalars().all())
+
+
+async def admin_set_balance(session: AsyncSession, username: str, balance: int) -> User | None:
+    result = await session.execute(select(User).where(User.username == username))
+    user = result.scalar_one_or_none()
+    if user is None:
+        return None
+    user.balance = balance
+    await session.commit()
+    await session.refresh(user)
+    return user
