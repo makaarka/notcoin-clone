@@ -1,7 +1,7 @@
 import os
 from contextlib import asynccontextmanager
 
-from fastapi import Depends, FastAPI, Header, HTTPException
+from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from sqlalchemy import select
@@ -54,6 +54,16 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(title="NotCoin Клон API", lifespan=lifespan)
+
+
+@app.middleware("http")
+async def no_cache_static(request: Request, call_next):
+    """Telegram's in-app WebView caches static assets aggressively; force it to
+    always revalidate so game updates show up without a manual cache clear."""
+    response = await call_next(request)
+    if not request.url.path.startswith("/api/"):
+        response.headers["Cache-Control"] = "no-cache, must-revalidate"
+    return response
 
 
 async def get_current_user(x_init_data: str = Header(..., alias="X-Init-Data")) -> dict:
