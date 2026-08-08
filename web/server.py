@@ -83,6 +83,7 @@ def _user_to_dict(user: User) -> dict:
         "energy_max": user.energy_max,
         "tap_power": user.tap_power,
         "auto_click_level": user.auto_click_level,
+        "auto_click_rate_per_sec": user.auto_click_level * config.AUTO_CLICK_RATE_PER_LEVEL,
         "energy_regen_level": user.energy_regen_level,
         "energy_regen_per_sec": get_energy_regen_rate(user),
         "tap_upgrade_cost": get_tap_upgrade_cost(user),

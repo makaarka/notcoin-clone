@@ -28,6 +28,7 @@ const state = {
   energyMax: 1000,
   tapPower: 1,
   autoClickLevel: 0,
+  autoClickRatePerSec: 0,
   energyRegenLevel: 0,
   energyRegenPerSec: 1 / 3,
   tapUpgradeCost: 500,
@@ -127,6 +128,7 @@ function syncFromServer(data) {
   state.energyMax = data.energy_max;
   state.tapPower = data.tap_power;
   state.autoClickLevel = data.auto_click_level;
+  state.autoClickRatePerSec = data.auto_click_rate_per_sec;
   state.energyRegenLevel = data.energy_regen_level;
   state.energyRegenPerSec = data.energy_regen_per_sec;
   state.tapUpgradeCost = data.tap_upgrade_cost;
@@ -140,12 +142,19 @@ el.coin.addEventListener("click", () => {
   scheduleFlush();
 });
 
-// Regenerate energy locally between server syncs (visual only, matches backend rate/upgrades)
+// Tick energy regen and auto-click income locally every second, between server syncs
+// (visual only — the server independently recomputes both from elapsed time on each sync)
 setInterval(() => {
+  let changed = false;
   if (state.energy < state.energyMax) {
     state.energy = Math.min(state.energyMax, state.energy + state.energyRegenPerSec);
-    render();
+    changed = true;
   }
+  if (state.autoClickRatePerSec > 0) {
+    state.balance += state.autoClickRatePerSec;
+    changed = true;
+  }
+  if (changed) render();
 }, 1000);
 
 // Periodic sync: flushes pending taps, or pulls fresh balance (covers auto-click income)
