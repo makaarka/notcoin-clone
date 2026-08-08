@@ -132,40 +132,44 @@ function addCrackLine(svg, x1, y1, x2, y2, width) {
   svg.appendChild(line);
 }
 
+let crackSvgEl = null;
+
 function clearCracks() {
   el.crackOverlay.innerHTML = "";
+  crackSvgEl = null;
 }
 
-// Damage escalates with combo: tier 1 stays out on the gold rim (clear of the
-// eagle emblem in the middle), tiers 2-3 spread wider and get denser.
-const CRACK_TIER_CONFIG = {
-  1: { count: 3, rMin: 55, rMax: 88, branchChance: 0.25 },
-  2: { count: 6, rMin: 45, rMax: 94, branchChance: 0.5 },
-  3: { count: 12, rMin: 20, rMax: 98, branchChance: 0.85 },
-};
-
-function drawCracks(tier) {
-  clearCracks();
-  const cfg = CRACK_TIER_CONFIG[tier];
-  if (!cfg) return;
-
+function getCrackSvg() {
+  if (crackSvgEl) return crackSvgEl;
   const svg = document.createElementNS(SVG_NS, "svg");
   svg.setAttribute("viewBox", "0 0 200 200");
   svg.classList.add("crack-svg");
+  el.crackOverlay.appendChild(svg);
+  crackSvgEl = svg;
+  return svg;
+}
 
+// Damage escalates with combo: tier 1 stays out on the gold rim (clear of the
+// eagle emblem in the middle), tiers 2-3 spread wider and get denser. Each
+// tier only ADDS its cracks on top of whatever is already drawn, so earlier
+// cracks stay put instead of the whole pattern jumping to a new random one.
+const CRACK_TIER_CONFIG = {
+  1: { addCount: 3, rMin: 55, rMax: 88, branchChance: 0.25 },
+  2: { addCount: 4, rMin: 45, rMax: 94, branchChance: 0.5 },
+  3: { addCount: 6, rMin: 20, rMax: 98, branchChance: 0.85 },
+};
+
+function growCracks(tier) {
+  const cfg = CRACK_TIER_CONFIG[tier];
+  if (!cfg) return;
+
+  const svg = getCrackSvg();
   const cx = 100;
   const cy = 100;
   const span = cfg.rMax - cfg.rMin;
-  const usedAngles = [];
 
-  for (let i = 0; i < cfg.count; i++) {
-    let angle;
-    let attempts = 0;
-    do {
-      angle = Math.random() * Math.PI * 2;
-      attempts++;
-    } while (usedAngles.some((a) => Math.abs(a - angle) < 0.35) && attempts < 12);
-    usedAngles.push(angle);
+  for (let i = 0; i < cfg.addCount; i++) {
+    const angle = Math.random() * Math.PI * 2;
 
     const startR = cfg.rMin + Math.random() * span * 0.2;
     const midR = cfg.rMin + span * 0.35 + Math.random() * span * 0.25;
@@ -191,8 +195,6 @@ function drawCracks(tier) {
       addCrackLine(svg, mx, my, bx, by, 1.2);
     }
   }
-
-  el.crackOverlay.appendChild(svg);
 }
 
 const coinStageEl = document.querySelector(".coin-stage");
@@ -275,7 +277,7 @@ function registerCombo() {
 
   if (targetTier > crackTier) {
     crackTier = targetTier;
-    drawCracks(crackTier);
+    growCracks(crackTier);
     spawnSparks(4 + crackTier * 4);
     shakeCoin();
     el.coin.classList.add("hot");
