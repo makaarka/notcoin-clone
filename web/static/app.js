@@ -66,13 +66,19 @@ const el = {
   comboVal: document.getElementById("combo-val"),
   bgDecor: document.querySelector(".bg-decor"),
   leagueBadge: document.getElementById("league-badge"),
-  pph: document.getElementById("pph"),
+  leagueProgressFill: document.getElementById("league-progress-fill"),
+  statTap: document.getElementById("stat-tap"),
+  statNextLeague: document.getElementById("stat-next-league"),
+  statPph: document.getElementById("stat-pph"),
+  quickUpgradeBtn: document.getElementById("quick-upgrade-btn"),
 };
 
 // Matches backend AUTO_CLICK_RATE_PER_LEVEL (0.2 coins/sec) * 3600 — each
 // auto-click level adds this many coins/hour, flat.
 const AUTO_CLICK_HOURLY_PER_LEVEL = 720;
 
+// Ordered highest tier first, so the first match walking down is the
+// player's current league and the entry right before it is the next one up.
 const LEAGUES = [
   { min: 5000000, name: "Алмаз", icon: "👑", color: "#b98cff", bg: "rgba(185,140,255,0.18)", border: "rgba(185,140,255,0.5)" },
   { min: 500000, name: "Платина", icon: "💎", color: "#7ee8ff", bg: "rgba(126,232,255,0.16)", border: "rgba(126,232,255,0.45)" },
@@ -82,8 +88,14 @@ const LEAGUES = [
   { min: 0, name: "Новичок", icon: "🔰", color: "#9b94b3", bg: "rgba(155,148,179,0.14)", border: "rgba(155,148,179,0.35)" },
 ];
 
-function getLeague(balance) {
-  return LEAGUES.find((l) => balance >= l.min);
+function getLeagueInfo(balance) {
+  const idx = LEAGUES.findIndex((l) => balance >= l.min);
+  const current = LEAGUES[idx];
+  const next = idx > 0 ? LEAGUES[idx - 1] : null;
+  if (!next) return { current, next: null, pct: 100, remaining: 0 };
+  const span = next.min - current.min;
+  const pct = Math.max(0, Math.min(100, ((balance - current.min) / span) * 100));
+  return { current, next, pct, remaining: Math.max(0, next.min - balance) };
 }
 
 function spawnMilestoneFlash() {
@@ -245,18 +257,21 @@ function render() {
   el.upgradeEnergyBtn.disabled = state.balance < state.energyRegenUpgradeCost;
 
   const hourly = Math.floor(state.autoClickRatePerSec * 3600);
-  el.pph.textContent = `⚡ ${hourly.toLocaleString("ru-RU")}/час`;
+  el.statPph.textContent = hourly.toLocaleString("ru-RU");
+  el.statTap.textContent = state.tapPower;
   el.autoClickPph.textContent = hourly.toLocaleString("ru-RU");
   el.autoClickNextPph.textContent = AUTO_CLICK_HOURLY_PER_LEVEL.toLocaleString("ru-RU");
 
-  const league = getLeague(state.balance);
-  if (league.name !== state.leagueName) {
-    state.leagueName = league.name;
-    el.leagueBadge.textContent = `${league.icon} ${league.name}`;
-    el.leagueBadge.style.color = league.color;
-    el.leagueBadge.style.background = league.bg;
-    el.leagueBadge.style.borderColor = league.border;
+  const info = getLeagueInfo(state.balance);
+  if (info.current.name !== state.leagueName) {
+    state.leagueName = info.current.name;
+    el.leagueBadge.textContent = `${info.current.icon} ${info.current.name}`;
+    el.leagueBadge.style.color = info.current.color;
+    el.leagueBadge.style.background = info.current.bg;
+    el.leagueBadge.style.borderColor = info.current.border;
   }
+  el.leagueProgressFill.style.width = `${info.pct}%`;
+  el.statNextLeague.textContent = info.next ? info.remaining.toLocaleString("ru-RU") : "MAX";
 }
 
 function tap() {
@@ -361,6 +376,10 @@ document.querySelectorAll(".tab").forEach((btn) => {
     if (btn.dataset.screen === "screen-friends") { loadMe(); loadFriends(); }
     if (btn.dataset.screen === "screen-upgrade") loadMe();
   });
+});
+
+el.quickUpgradeBtn.addEventListener("click", () => {
+  document.querySelector('.tab[data-screen="screen-upgrade"]').click();
 });
 
 // --- Tasks ---

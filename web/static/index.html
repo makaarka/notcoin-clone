@@ -22,8 +22,33 @@
 
   <main id="screen-tap" class="screen active">
     <div class="tap-card">
-      <div id="league-badge" class="rank">Новичок</div>
+      <div class="stats-row">
+        <div class="stat-chip">
+          <span class="stat-label">Доход за тап</span>
+          <span class="stat-value">🪙 <span id="stat-tap">1</span></span>
+        </div>
+        <div class="stat-chip">
+          <span class="stat-label">До след. лиги</span>
+          <span class="stat-value" id="stat-next-league">5 000</span>
+        </div>
+        <div class="stat-chip">
+          <span class="stat-label">Доход в час</span>
+          <span class="stat-value stat-green">⚡ <span id="stat-pph">0</span></span>
+        </div>
+      </div>
+
+      <div class="balance-row">
+        <span class="coin-icon">🪙</span>
+        <span id="balance">0</span>
+      </div>
+
+      <div class="league-row">
+        <div id="league-badge" class="league-badge">🔰 Новичок</div>
+        <div class="league-progress"><div id="league-progress-fill" class="league-progress-fill"></div></div>
+      </div>
+
       <div id="combo" class="combo-badge">🔥 Combo ×<span id="combo-val">0</span></div>
+
       <div class="coin-stage">
         <div class="coin-ring"></div>
         <div class="coin-ring coin-ring-outer"></div>
@@ -35,17 +60,16 @@
         </button>
         <div id="particles" class="particles"></div>
       </div>
-      <div class="balance-pill">
-        <span class="coin-icon">🪙</span>
-        <span id="balance">0</span>
-      </div>
-      <div id="pph" class="pph-label">⚡ 0/час</div>
-      <div class="energy-wrap">
-        <div class="energy-row">
-          <span class="energy-icon">⚡</span>
-          <div class="energy-bar"><div id="energy-fill" class="energy-fill"></div></div>
+
+      <div class="bottom-row">
+        <div class="energy-wrap">
+          <div class="energy-row">
+            <span class="energy-icon">⚡</span>
+            <div class="energy-bar"><div id="energy-fill" class="energy-fill"></div></div>
+          </div>
+          <div class="energy-label"><span id="energy-cur">1000</span> / <span id="energy-max">1000</span></div>
         </div>
-        <div class="energy-label"><span id="energy-cur">1000</span> / <span id="energy-max">1000</span></div>
+        <button id="quick-upgrade-btn" class="boost-btn">🚀 Прокачка</button>
       </div>
     </div>
   </main>

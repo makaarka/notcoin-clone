@@ -118,30 +118,98 @@ html, body {
   overflow: hidden;
 }
 
-.balance-pill {
+.stats-row {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 22px;
-  border-radius: 999px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.09), rgba(255,255,255,0.03));
-  border: 1px solid var(--card-border);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08);
-  backdrop-filter: blur(14px);
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 22px;
-  letter-spacing: 0.2px;
-  margin-bottom: 6px;
+  gap: 6px;
+  width: 100%;
 }
 
-.coin-icon { font-size: 22px; filter: drop-shadow(0 2px 4px rgba(245,166,35,0.5)); }
+.stat-chip {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 7px 4px;
+  border-radius: 12px;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  backdrop-filter: blur(10px);
+}
 
-.pph-label {
-  font-size: 12.5px;
+.stat-label {
+  font-size: 8.5px;
   font-weight: 600;
-  color: var(--text-dim);
-  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--text-faint);
+  white-space: nowrap;
+}
+
+.stat-value {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.stat-green { color: #7ee89b; }
+
+.balance-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 34px;
+  letter-spacing: 0.2px;
+}
+
+.coin-icon { font-size: 28px; filter: drop-shadow(0 2px 4px rgba(245,166,35,0.5)); }
+
+.league-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  width: 100%;
+  max-width: 220px;
+}
+
+.league-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  background: rgba(155, 148, 179, 0.14);
+  border: 1px solid rgba(155, 148, 179, 0.35);
+  transition: color 0.25s ease, background 0.25s ease, border-color 0.25s ease;
+}
+
+.league-progress {
+  width: 100%;
+  height: 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.league-progress-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #7ee8ff, #b98cff, #ffe27a);
+  transition: width 0.4s ease;
 }
 
 /* ---------- screens ---------- */
@@ -190,25 +258,6 @@ h2 {
   padding: 8px 4px 6px;
 }
 
-.rank {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 8px;
-  padding: 6px 16px;
-  border-radius: 999px;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 12.5px;
-  letter-spacing: 0.6px;
-  text-transform: uppercase;
-  color: var(--text-faint);
-  background: rgba(155, 148, 179, 0.14);
-  border: 1px solid rgba(155, 148, 179, 0.35);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
-  transition: color 0.25s ease, background 0.25s ease, border-color 0.25s ease;
-}
-
 .combo-badge {
   margin-top: 10px;
   padding: 6px 16px;
@@ -244,9 +293,9 @@ h2 {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: min(64vw, 280px);
-  height: min(64vw, 280px);
-  margin: 18px 0;
+  width: min(54vw, 235px);
+  height: min(54vw, 235px);
+  margin: 10px 0;
   animation: float-idle 4.5s ease-in-out infinite;
 }
 
@@ -433,6 +482,33 @@ h2 {
   100% { opacity: 0; transform: translate(-50%, -50%) scale(2.4); }
 }
 
+
+.bottom-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 340px;
+}
+
+.bottom-row .energy-wrap {
+  flex: 1;
+}
+
+.boost-btn {
+  flex-shrink: 0;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 12.5px;
+  color: #251400;
+  background: linear-gradient(180deg, var(--gold-1), var(--gold-2));
+  box-shadow: 0 6px 16px rgba(245, 166, 35, 0.35);
+  cursor: pointer;
+  white-space: nowrap;
+}
 
 .energy-wrap {
   width: 100%;
