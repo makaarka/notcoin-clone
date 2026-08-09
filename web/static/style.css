@@ -142,6 +142,63 @@ html, body {
 
 .coin-icon { font-size: 22px; filter: drop-shadow(0 2px 4px rgba(245,166,35,0.5)); }
 
+.mini-leaderboard {
+  position: absolute;
+  top: 18px;
+  left: 14px;
+  z-index: 3;
+  min-width: 118px;
+  padding: 8px 10px;
+  border-radius: 14px;
+  background: rgba(20, 18, 34, 0.6);
+  border: 1px solid var(--card-border);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.mini-title {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 4px;
+  white-space: nowrap;
+}
+
+.mini-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  padding: 2px 0;
+}
+
+.mini-rank {
+  width: 14px;
+  flex-shrink: 0;
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--text-faint);
+}
+
+.mini-name {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mini-score {
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--gold-1);
+}
+
 /* ---------- screens ---------- */
 
 .screen {
