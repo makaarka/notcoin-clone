@@ -138,10 +138,8 @@ html, body {
 .coin-icon { font-size: 22px; filter: drop-shadow(0 2px 4px rgba(245,166,35,0.5)); }
 
 .mini-leaderboard {
-  position: absolute;
-  top: 18px;
-  left: 14px;
-  z-index: 3;
+  align-self: flex-start;
+  margin: 10px 0 0 10px;
   min-width: 118px;
   padding: 8px 10px;
   border-radius: 14px;
