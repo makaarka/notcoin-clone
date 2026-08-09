@@ -132,10 +132,17 @@ html, body {
   font-weight: 700;
   font-size: 22px;
   letter-spacing: 0.2px;
-  margin-bottom: 12px;
+  margin-bottom: 6px;
 }
 
 .coin-icon { font-size: 22px; filter: drop-shadow(0 2px 4px rgba(245,166,35,0.5)); }
+
+.pph-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+}
 
 /* ---------- screens ---------- */
 
@@ -530,6 +537,7 @@ h2 {
 .upgrade-info { flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .upgrade-title { font-weight: 700; font-size: 14.5px; }
 .upgrade-desc { font-size: 12px; color: var(--text-dim); }
+.upgrade-roi { font-size: 11px; color: var(--gold-1); font-weight: 600; }
 
 .leader-item .rank-num {
   width: 28px;

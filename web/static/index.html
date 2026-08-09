@@ -22,7 +22,7 @@
 
   <main id="screen-tap" class="screen active">
     <div class="tap-card">
-      <div class="rank">Игрок</div>
+      <div id="league-badge" class="rank">Новичок</div>
       <div id="combo" class="combo-badge">🔥 Combo ×<span id="combo-val">0</span></div>
       <div class="coin-stage">
         <div class="coin-ring"></div>
@@ -39,6 +39,7 @@
         <span class="coin-icon">🪙</span>
         <span id="balance">0</span>
       </div>
+      <div id="pph" class="pph-label">⚡ 0/час</div>
       <div class="energy-wrap">
         <div class="energy-row">
           <span class="energy-icon">⚡</span>
@@ -85,7 +86,8 @@
         <div class="upgrade-icon">🤖</div>
         <div class="upgrade-info">
           <span class="upgrade-title">Автокликер</span>
-          <span class="upgrade-desc">Уровень <span id="auto-click-val">0</span> · монеты капают сами</span>
+          <span class="upgrade-desc">Уровень <span id="auto-click-val">0</span> · <span id="auto-click-pph">0</span>/час сейчас</span>
+          <span class="upgrade-roi">+<span id="auto-click-next-pph">720</span>/час за апгрейд</span>
         </div>
         <button id="upgrade-auto-btn" class="task-btn">
           <span id="auto-click-cost">2000</span> 🪙

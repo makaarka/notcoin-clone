@@ -53,6 +53,8 @@ const el = {
   tapPowerCost: document.getElementById("tap-power-cost"),
   autoClickVal: document.getElementById("auto-click-val"),
   autoClickCost: document.getElementById("auto-click-cost"),
+  autoClickPph: document.getElementById("auto-click-pph"),
+  autoClickNextPph: document.getElementById("auto-click-next-pph"),
   upgradeTapBtn: document.getElementById("upgrade-tap-btn"),
   upgradeAutoBtn: document.getElementById("upgrade-auto-btn"),
   energyRegenVal: document.getElementById("energy-regen-val"),
@@ -62,7 +64,26 @@ const el = {
   combo: document.getElementById("combo"),
   comboVal: document.getElementById("combo-val"),
   bgDecor: document.querySelector(".bg-decor"),
+  leagueBadge: document.getElementById("league-badge"),
+  pph: document.getElementById("pph"),
 };
+
+// Matches backend AUTO_CLICK_RATE_PER_LEVEL (0.2 coins/sec) * 3600 — each
+// auto-click level adds this many coins/hour, flat.
+const AUTO_CLICK_HOURLY_PER_LEVEL = 720;
+
+const LEAGUES = [
+  { min: 5000000, name: "Алмаз" },
+  { min: 500000, name: "Платина" },
+  { min: 100000, name: "Золото" },
+  { min: 25000, name: "Серебро" },
+  { min: 5000, name: "Бронза" },
+  { min: 0, name: "Новичок" },
+];
+
+function getLeague(balance) {
+  return LEAGUES.find((l) => balance >= l.min).name;
+}
 
 function spawnMilestoneFlash() {
   const f = document.createElement("div");
@@ -221,6 +242,12 @@ function render() {
   el.energyRegenVal.textContent = state.energyRegenPerSec.toFixed(2);
   el.energyRegenCost.textContent = state.energyRegenUpgradeCost.toLocaleString("ru-RU");
   el.upgradeEnergyBtn.disabled = state.balance < state.energyRegenUpgradeCost;
+
+  const hourly = Math.floor(state.autoClickRatePerSec * 3600);
+  el.pph.textContent = `⚡ ${hourly.toLocaleString("ru-RU")}/час`;
+  el.autoClickPph.textContent = hourly.toLocaleString("ru-RU");
+  el.autoClickNextPph.textContent = AUTO_CLICK_HOURLY_PER_LEVEL.toLocaleString("ru-RU");
+  el.leagueBadge.textContent = getLeague(state.balance);
 }
 
 function tap() {
