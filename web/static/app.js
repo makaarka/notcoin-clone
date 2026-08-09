@@ -62,28 +62,7 @@ const el = {
   combo: document.getElementById("combo"),
   comboVal: document.getElementById("combo-val"),
   bgDecor: document.querySelector(".bg-decor"),
-  miniLeaderboardList: document.getElementById("mini-leaderboard-list"),
 };
-
-const MEDALS = ["🥇", "🥈", "🥉"];
-async function loadMiniLeaderboard() {
-  try {
-    const top = await api("/api/leaderboard");
-    el.miniLeaderboardList.innerHTML = "";
-    top.slice(0, 3).forEach((p, i) => {
-      const row = document.createElement("div");
-      row.className = "mini-row";
-      row.innerHTML = `
-        <span class="mini-rank">${MEDALS[i] || `#${p.rank}`}</span>
-        <span class="mini-name">${p.username}</span>
-        <span class="mini-score">${p.balance.toLocaleString("ru-RU")}</span>
-      `;
-      el.miniLeaderboardList.appendChild(row);
-    });
-  } catch (e) {
-    console.error(e);
-  }
-}
 
 function spawnMilestoneFlash() {
   const f = document.createElement("div");
@@ -493,7 +472,4 @@ el.upgradeEnergyBtn.addEventListener("click", async () => {
   } catch (e) {
     console.error("init failed", e);
   }
-  loadMiniLeaderboard();
 })();
-
-setInterval(loadMiniLeaderboard, 20000);
