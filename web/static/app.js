@@ -36,6 +36,7 @@ const state = {
   energyRegenUpgradeCost: 800,
   pendingTaps: 0,
   refLink: "",
+  leagueName: null,
 };
 
 const el = {
@@ -73,16 +74,16 @@ const el = {
 const AUTO_CLICK_HOURLY_PER_LEVEL = 720;
 
 const LEAGUES = [
-  { min: 5000000, name: "Алмаз" },
-  { min: 500000, name: "Платина" },
-  { min: 100000, name: "Золото" },
-  { min: 25000, name: "Серебро" },
-  { min: 5000, name: "Бронза" },
-  { min: 0, name: "Новичок" },
+  { min: 5000000, name: "Алмаз", icon: "👑", color: "#b98cff", bg: "rgba(185,140,255,0.18)", border: "rgba(185,140,255,0.5)" },
+  { min: 500000, name: "Платина", icon: "💎", color: "#7ee8ff", bg: "rgba(126,232,255,0.16)", border: "rgba(126,232,255,0.45)" },
+  { min: 100000, name: "Золото", icon: "🥇", color: "#ffe27a", bg: "rgba(245,166,35,0.2)", border: "rgba(245,166,35,0.55)" },
+  { min: 25000, name: "Серебро", icon: "🥈", color: "#d7dee5", bg: "rgba(201,210,218,0.16)", border: "rgba(201,210,218,0.4)" },
+  { min: 5000, name: "Бронза", icon: "🥉", color: "#e3a15f", bg: "rgba(205,127,50,0.18)", border: "rgba(205,127,50,0.45)" },
+  { min: 0, name: "Новичок", icon: "🔰", color: "#9b94b3", bg: "rgba(155,148,179,0.14)", border: "rgba(155,148,179,0.35)" },
 ];
 
 function getLeague(balance) {
-  return LEAGUES.find((l) => balance >= l.min).name;
+  return LEAGUES.find((l) => balance >= l.min);
 }
 
 function spawnMilestoneFlash() {
@@ -247,7 +248,15 @@ function render() {
   el.pph.textContent = `⚡ ${hourly.toLocaleString("ru-RU")}/час`;
   el.autoClickPph.textContent = hourly.toLocaleString("ru-RU");
   el.autoClickNextPph.textContent = AUTO_CLICK_HOURLY_PER_LEVEL.toLocaleString("ru-RU");
-  el.leagueBadge.textContent = getLeague(state.balance);
+
+  const league = getLeague(state.balance);
+  if (league.name !== state.leagueName) {
+    state.leagueName = league.name;
+    el.leagueBadge.textContent = `${league.icon} ${league.name}`;
+    el.leagueBadge.style.color = league.color;
+    el.leagueBadge.style.background = league.bg;
+    el.leagueBadge.style.borderColor = league.border;
+  }
 }
 
 function tap() {
