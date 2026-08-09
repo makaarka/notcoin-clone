@@ -118,12 +118,6 @@ html, body {
   overflow: hidden;
 }
 
-.topbar {
-  display: flex;
-  justify-content: center;
-  padding: 16px 0 8px;
-}
-
 .balance-pill {
   display: flex;
   align-items: center;
@@ -138,6 +132,7 @@ html, body {
   font-weight: 700;
   font-size: 22px;
   letter-spacing: 0.2px;
+  margin-bottom: 12px;
 }
 
 .coin-icon { font-size: 22px; filter: drop-shadow(0 2px 4px rgba(245,166,35,0.5)); }
