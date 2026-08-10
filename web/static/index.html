@@ -23,27 +23,28 @@
   <main id="screen-tap" class="screen active">
     <div class="tap-card">
       <div class="stats-row">
-        <div class="stat-chip">
-          <span class="stat-label">Доход за тап</span>
+        <div class="stat-chip stat-orange">
+          <span class="stat-label">Прибыль за тап</span>
           <span class="stat-value">🪙 <span id="stat-tap">1</span></span>
         </div>
-        <div class="stat-chip">
-          <span class="stat-label">До след. лиги</span>
+        <div class="stat-chip stat-purple">
+          <span class="stat-label">Монет для апа</span>
           <span class="stat-value" id="stat-next-league">5 000</span>
         </div>
-        <div class="stat-chip">
-          <span class="stat-label">Доход в час</span>
-          <span class="stat-value stat-green">⚡ <span id="stat-pph">0</span></span>
+        <div class="stat-chip stat-green">
+          <span class="stat-label">Прибыль в час</span>
+          <span class="stat-value">🪙 <span id="stat-pph">0</span></span>
         </div>
       </div>
 
       <div class="balance-row">
         <span class="coin-icon">🪙</span>
         <span id="balance">0</span>
+        <span id="league-level" class="league-level">Уровень 1/6</span>
       </div>
 
       <div class="league-row">
-        <div id="league-badge" class="league-badge">🔰 Новичок</div>
+        <div id="league-badge" class="league-badge">Новичок <span class="chevron">›</span></div>
         <div class="league-progress"><div id="league-progress-fill" class="league-progress-fill"></div></div>
       </div>
 

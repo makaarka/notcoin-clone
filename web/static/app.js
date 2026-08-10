@@ -66,6 +66,7 @@ const el = {
   comboVal: document.getElementById("combo-val"),
   bgDecor: document.querySelector(".bg-decor"),
   leagueBadge: document.getElementById("league-badge"),
+  leagueLevel: document.getElementById("league-level"),
   leagueProgressFill: document.getElementById("league-progress-fill"),
   statTap: document.getElementById("stat-tap"),
   statNextLeague: document.getElementById("stat-next-league"),
@@ -91,11 +92,12 @@ const LEAGUES = [
 function getLeagueInfo(balance) {
   const idx = LEAGUES.findIndex((l) => balance >= l.min);
   const current = LEAGUES[idx];
+  const level = LEAGUES.length - idx;
   const next = idx > 0 ? LEAGUES[idx - 1] : null;
-  if (!next) return { current, next: null, pct: 100, remaining: 0 };
+  if (!next) return { current, next: null, pct: 100, remaining: 0, level };
   const span = next.min - current.min;
   const pct = Math.max(0, Math.min(100, ((balance - current.min) / span) * 100));
-  return { current, next, pct, remaining: Math.max(0, next.min - balance) };
+  return { current, next, pct, remaining: Math.max(0, next.min - balance), level };
 }
 
 function spawnMilestoneFlash() {
@@ -265,10 +267,9 @@ function render() {
   const info = getLeagueInfo(state.balance);
   if (info.current.name !== state.leagueName) {
     state.leagueName = info.current.name;
-    el.leagueBadge.textContent = `${info.current.icon} ${info.current.name}`;
+    el.leagueBadge.innerHTML = `${info.current.name} <span class="chevron">›</span>`;
     el.leagueBadge.style.color = info.current.color;
-    el.leagueBadge.style.background = info.current.bg;
-    el.leagueBadge.style.borderColor = info.current.border;
+    el.leagueLevel.textContent = `Уровень ${info.level}/${LEAGUES.length}`;
   }
   el.leagueProgressFill.style.width = `${info.pct}%`;
   el.statNextLeague.textContent = info.next ? info.remaining.toLocaleString("ru-RU") : "MAX";

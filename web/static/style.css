@@ -154,12 +154,17 @@ html, body {
   color: var(--text);
 }
 
-.stat-green { color: #7ee89b; }
+.stat-orange .stat-label { color: #ff9f5a; }
+.stat-purple .stat-label { color: #a78bfa; }
+.stat-green .stat-label { color: #7ee89b; }
 
 .balance-row {
+  position: relative;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
+  width: 100%;
   margin-top: 14px;
   font-family: var(--font-display);
   font-weight: 800;
@@ -167,33 +172,46 @@ html, body {
   letter-spacing: 0.2px;
 }
 
+.league-level {
+  position: absolute;
+  right: 4px;
+  bottom: 2px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text-faint);
+}
+
 .coin-icon { font-size: 28px; filter: drop-shadow(0 2px 4px rgba(245,166,35,0.5)); }
 
 .league-row {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   gap: 6px;
-  margin-top: 8px;
+  margin-top: 10px;
   width: 100%;
-  max-width: 220px;
+  max-width: 340px;
 }
 
 .league-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 5px 14px;
-  border-radius: 999px;
+  gap: 3px;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 12px;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
+  font-size: 14px;
+  letter-spacing: 0.2px;
   color: var(--text-faint);
-  background: rgba(155, 148, 179, 0.14);
-  border: 1px solid rgba(155, 148, 179, 0.35);
-  transition: color 0.25s ease, background 0.25s ease, border-color 0.25s ease;
+  cursor: default;
+  transition: color 0.25s ease;
+}
+
+.league-badge .chevron {
+  font-size: 15px;
+  opacity: 0.7;
 }
 
 .league-progress {
@@ -497,15 +515,16 @@ h2 {
 
 .boost-btn {
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   border: none;
-  border-radius: 12px;
-  padding: 10px 14px;
+  background: none;
+  padding: 6px 4px;
   font-family: var(--font-body);
   font-weight: 700;
-  font-size: 12.5px;
-  color: #251400;
-  background: linear-gradient(180deg, var(--gold-1), var(--gold-2));
-  box-shadow: 0 6px 16px rgba(245, 166, 35, 0.35);
+  font-size: 14px;
+  color: var(--text);
   cursor: pointer;
   white-space: nowrap;
 }
